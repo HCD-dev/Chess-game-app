@@ -135,10 +135,16 @@ public class Chessman : MonoBehaviour
     }
     private void OnMouseUp()
     {
-        if (!controller.GetComponent<Game>().IsGameOver() && controller.GetComponent<Game>().GetCurrentPlayer() == player)
+        
+        Game gameScript = controller.GetComponent<Game>();
+        if (gameScript.IsGamePaused())
         {
+            return;
+        }
 
-            Debug.Log($"[Chessman] Clicked '{name}' at {Xboard},{Yboard}");
+       
+        if (!gameScript.IsGameOver() && gameScript.GetCurrentPlayer() == player)
+        {
             DestroyMovePlates();
             InitiateMovePlates();
         }

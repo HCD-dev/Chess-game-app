@@ -7,6 +7,13 @@ using UnityEngine.EventSystems;
 
 public class Game : MonoBehaviour
 {
+    [Header("Promotion UI")]
+    public GameObject promotionPanel; 
+    private int promotionX;
+    private int promotionY;
+    private GameObject pawnToPromote;
+
+    private bool isPromoting = false; 
 
     public GameObject chestpiece;
     private GameObject[,] positions = new GameObject[8, 8];
@@ -428,5 +435,58 @@ public class Game : MonoBehaviour
             }
         }
         return false;
+    }
+    public bool CheckPawnPromotion(GameObject piece, int targetX, int targetY)
+    {
+        Chessman cm = piece.GetComponent<Chessman>();
+        string baseName = piece.name.EndsWith("_0") ? piece.name.Substring(0, piece.name.Length - 2) : piece.name;
+
+        if (baseName == "white_pawn" && targetY == 7) return true;
+        if (baseName == "black_pawn" && targetY == 0) return true;
+
+        return false;
+    }
+    public void OpenPromotionMenu(GameObject pawn, int x, int y)
+    {
+        pawnToPromote = pawn;
+        promotionX = x;
+        promotionY = y;
+
+        isPromoting = true; // <-- OYUNU DONDUR: Terfi baþladý
+
+        if (promotionPanel != null)
+        {
+            promotionPanel.SetActive(true);
+        }
+        else
+        {
+            PromoteTo("queen");
+        }
+    }
+
+    public void PromoteTo(string pieceType)
+    {
+        if (pawnToPromote == null) return;
+
+        string playerColor = pawnToPromote.GetComponent<Chessman>().player;
+
+        positions[promotionX, promotionY] = null;
+        Destroy(pawnToPromote);
+
+        string newPieceName = playerColor + "_" + pieceType;
+        Create(newPieceName, promotionX, promotionY);
+
+        if (promotionPanel != null) promotionPanel.SetActive(false);
+
+        pawnToPromote = null;
+
+        isPromoting = false; // <-- OYUNU ÇÖZ: Terfi bitti, oyun akýþý devam edebilir
+
+        NextTurn();
+    }
+    public bool IsGamePaused()
+    {
+        // Oyun bittiyse VEYA þu an bir terfi seçimi yapýlýyorsa true döner
+        return gameOver || isPromoting;
     }
 }

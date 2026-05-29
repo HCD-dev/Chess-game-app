@@ -38,37 +38,50 @@ public class MovePlate : MonoBehaviour
     {
         Debug.Log($"[MovePlate] Clicked target {matrixX},{matrixY} attack={attack}");
         controller = GameObject.FindGameObjectWithTag("GameController");
+        Game gameScript = controller.GetComponent<Game>();
 
         if (attack)
         {
-            GameObject cp = controller.GetComponent<Game>().GetPosition(matrixX, matrixY);
-            if (cp != null)
-            {
-                // Þah doðrudan yok edilmiyor, mat kontrolünü Game.cs üstleniyor.
-                Destroy(cp);
-            }
+            GameObject cp = gameScript.GetPosition(matrixX, matrixY);
+            if (cp != null) Destroy(cp);
         }
 
-        // Taþý yeni kareye taþýma iþlemleri
-        controller.GetComponent<Game>().SetPositionEmpty(reference.GetComponent<Chessman>().GetXBoard(),
-            reference.GetComponent<Chessman>().GetYBoard());
+        // YENÝ: Eðer oyun durdurulduysa plaka tetiklenmesin
+        if (gameScript.IsGamePaused())
+        {
+            return;
+        }
+
+        // ... Mevcut hamle yapma kodlarýn aynen devam ediyor ...
+        Debug.Log($"[MovePlate] Clicked target {matrixX},{matrixY} attack={attack}");
+        // ...
+        int oldX = reference.GetComponent<Chessman>().GetXBoard();
+        int oldY = reference.GetComponent<Chessman>().GetYBoard();
+
+        gameScript.SetPositionEmpty(oldX, oldY);
 
         reference.GetComponent<Chessman>().SetXBoard(matrixX);
         reference.GetComponent<Chessman>().SetYBoard(matrixY);
         reference.GetComponent<Chessman>().SetCoords();
 
-        controller.GetComponent<Game>().SetPosition(reference);
+        gameScript.SetPosition(reference);
 
-        // Sýrayý geçirirken mat kontrolü burada tetiklenecek
-        controller.GetComponent<Game>().NextTurn();
-
-        reference.GetComponent<Chessman>().DestroyMovePlates();
+        // YENÝ: Piyon terfi kontrolü
+        if (gameScript.CheckPawnPromotion(reference, matrixX, matrixY))
+        {
+            reference.GetComponent<Chessman>().DestroyMovePlates();
+            // Paneli aç (Sýra deðiþimi paneldeki seçimden sonra tetiklenecek)
+            gameScript.OpenPromotionMenu(reference, matrixX, matrixY);
+        }
+        else
+        {
+            // Normal hamleyse sýrayý direkt geçir
+            gameScript.NextTurn();
+            reference.GetComponent<Chessman>().DestroyMovePlates();
+        }
 
         PlayMoveSound soundScript = Object.FindAnyObjectByType<PlayMoveSound>();
-        if (soundScript != null)
-        {
-            soundScript.PlaySound();
-        }
+        if (soundScript != null) soundScript.PlaySound();
     }
     public void SetCoords(int x, int y)
     {
