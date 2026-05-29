@@ -3639,7 +3639,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b157652614d0e884b858ff01b1a748a7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Game
-  promotionPanel: {fileID: 0}
+  promotionPanel: {fileID: 1908042487}
   chestpiece: {fileID: 7570479899363893078, guid: 40e578e459c80dd4392bfaf849673f79, type: 3}
   winnerText: {fileID: 2006612557}
   restartButton: {fileID: 618307893}
